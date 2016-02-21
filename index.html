@@ -36,13 +36,17 @@
           <div class="container">
             <div class="header-left">
               <span class="header-item">
-                <a href="https://eigenein.xyz">eigenein.xyz</a>
+                <a class="is-active" href="https://eigenein.xyz" target="_blank">eigenein.xyz</a>
               </span>
               <span class="header-item">
-                <a href="https://www.abnamro.nl/en/personal/index.html" target="_blank">ABN AMRO</a>
+                <a href="https://www.abnamro.nl/en/personal/index.html" target="_blank"><i class="fa fa-external-link"></i> ABN AMRO Website</a>
+              </span>
+              <span class="header-item">
+                <a href="https://www.abnamro.nl/en/paymentsreporting/downloadmutations.html" target="_blank"><i class="fa fa-external-link"></i> Download Transactions</a>
               </span>
             </div>
             <div class="header-right">
+              <span class="header-item">Share Link</span>
               <span class="header-item">
                 <span class="ya-share2" data-services="vkontakte,facebook,odnoklassniki,gplus,twitter,pocket"></span>
               </span>
@@ -135,7 +139,7 @@
             }
             var values = line.split("\t");
             if (values.length != 8) {
-              throw "Invalid number of values in line {0}: {1}.".format(line, values.length);
+              throw "Invalid number of values (" + values.length + ") in line " + (i + 1) + ": \"" + line + "\".";
             }
             result.push({
               // We'll need the index to have stable sorting.
