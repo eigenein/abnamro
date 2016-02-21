@@ -28,12 +28,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
-    <style>
-      [draggable=true] { -khtml-user-drag: element; }
-    </style>
   </head>
   <body onload="main()">
-    <section id="hero" class="hero is-info is-fullheight" draggable="true">
+    <section id="hero" class="hero is-info is-fullheight">
       <div class="hero-header">
         <header class="header">
           <div class="container">
@@ -58,13 +55,9 @@
           <h1 class="title">ABN AMRO Transactions Parser</h1>
           <h2 class="subtitle">Drop TAB-file with transactions here to get it parsed.</h2>
 
-          <div id="error-notification" class="notification is-danger" style="display: none">
-            Danger lorem ipsum dolor sit amet, consectetur
-            adipiscing elit lorem ipsum dolor sit amet,
-            consectetur adipiscing elit
-          </div>
+          <div id="error-notification" class="notification is-danger" style="display: none"></div>
 
-          <table id="table" class="table" style="display: none">
+          <table id="statistics-table" class="table" style="display: none">
             <thead>
               <tr>
                 <th>Month</th>
@@ -87,36 +80,87 @@
     <script>
       function main() {
         var hero = document.getElementById("hero");
+        var errorNotification = document.getElementById("error-notification");
+        var statisticsTable = document.getElementById("statistics-table");
 
-        function parseText(text) {
-          // TODO.
-        }
-
-        // Parse dropped file.
-        function parseFile(file) {
-          console.log("Reading %s (%s bytes).", file.name, file.size);
-          var reader = new FileReader();
-          reader.onload = parseText;
-          reader.readAsText(file, "ISO 8859-1");
-        }
-
+        // Catch drag'n'drop event.
         function onDragOver(event) {
           event.preventDefault();
           hero.className = "hero is-fullheight " + (event.type == "dragover" ? "is-success" : "is-info");
+          errorNotification.style.display = "none";
           return false;
         }
 
-        // Set drag'n'drop event listeners.
-        addEventListener("dragover", onDragOver, false);
-        addEventListener("dragleave", onDragOver, false);
-        addEventListener("drop", function (event) {
-          event.preventDefault();
-          hero.className = "hero is-fullheight is-info";
+        // Read dropped file.
+        function parseFile(file) {
+          console.log("Reading %s (%s bytes).", file.name, file.size);
+          var reader = new FileReader();
+          reader.onload = onReadAsText;
+          reader.readAsText(file, "ISO 8859-1");
+        }
 
-          parseFile(event.dataTransfer.files[0]);
+        // The file has been read.
+        function onReadAsText(text) {
+          console.log("File has been read.");
+          // First of all parse the file.
+          var lines;
+          try {
+            lines = parseText(text);
+          } catch (e) {
+            errorNotification.textContent = e;
+            errorNotification.style.display = "block";
+          }
+          console.log("%s lines.", lines.length);
+          statistics = calculateStatistics(lines);
+        }
 
-          return false;
-        }, false);
+        // Parses TAB file.
+        function parseText(event) {
+          var lines = event.target.result.split("\n");
+          var result = [];
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.length == 0) {
+              continue;
+            }
+            var values = line.split("\t");
+            if (values.length != 8) {
+              throw "Invalid number of values in line {0}: {1}.".format(line, values.length);
+            }
+            result.push({
+              accountNumber: values[0],
+              transactionDate: {
+                year: parseInt(values[2].slice(0, 4)),
+                month: parseInt(values[2].slice(4, 6)),
+                day: parseInt(values[2].slice(6, 8)),
+              },
+              startSaldo: parseFloat(values[3].replace(",", ".")),
+              endSaldo: parseFloat(values[4].replace(",", ".")),
+              amount: parseFloat(values[6].replace(",", ".")),
+            });
+          }
+          return result;
+        }
+
+        function calculateStatistics(lines) {
+          var statistics = new Object();
+        }
+
+        function init() {
+          // Set drag'n'drop event listeners.
+          addEventListener("dragover", onDragOver, false);
+          addEventListener("dragleave", onDragOver, false);
+          addEventListener("drop", function (event) {
+            event.preventDefault();
+            hero.className = "hero is-fullheight is-info";
+
+            parseFile(event.dataTransfer.files[0]);
+
+            return false;
+          }, false);
+        }
+
+        init();
       }
     </script>
   </body>
