@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="https://eigenein.xyz/">
+    <meta property="og:locale" content="en">
+    <meta property="og:site_name" content="ABN AMRO Transactions Parser">
+    <meta property="og:title" content="ABN AMRO Transactions Parser">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gh.eigenein.xyz/abnamro">
+    <meta property="article:author" content="Pavel Perestoronin">
+    <meta property="article:section" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:domain" content="ABN AMRO Transactions Parser">
+    <meta name="twitter:url" content="https://gh.eigenein.xyz/abnamro">
+    <meta name="twitter:site" content="https://gh.eigenein.xyz/abnamro">
+    <meta name="twitter:creator" content="Pavel Perestoronin">
+    <meta name="twitter:title" content="ABN AMRO Transactions Parser">
+    <title>ABN AMRO Transactions Parser</title>
+    <link rel="canonical" href="https://gh.eigenein.xyz/abnamro">
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jgthms/bulma/master/css/bulma.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <style>
+      [draggable=true] { -khtml-user-drag: element; }
+    </style>
+  </head>
+  <body onload="main()">
+    <section id="hero" class="hero is-info is-fullheight" draggable="true">
+      <div class="hero-header">
+        <header class="header">
+          <div class="container">
+            <div class="header-left">
+              <span class="header-item">
+                <a href="https://eigenein.xyz">eigenein.xyz</a>
+              </span>
+            </div>
+            <div class="header-right">
+              <span class="header-item">
+                <a href="https://www.abnamro.nl/en/personal/index.html" target="_blank">ABN AMRO</a>
+              </span>
+              <span class="header-item">
+                <a class="button is-primary is-inverted"><i class="fa fa-share"></i> Share</a>
+              </span>
+            </div>
+          </div>
+        </header>
+      </div>
+      <div class="hero-content">
+        <div class="container">
+          <h1 class="title">ABN AMRO Transactions Parser</h1>
+          <h2 class="subtitle">Drop TAB-file with transactions here to get it parsed.</h2>
+
+          <div id="error-notification" class="notification is-danger" style="display: none">
+            Danger lorem ipsum dolor sit amet, consectetur
+            adipiscing elit lorem ipsum dolor sit amet,
+            consectetur adipiscing elit
+          </div>
+
+          <table id="table" class="table" style="display: none">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Balance</th>
+                <th>Open</th>
+                <th>Close</th>
+                <th>Minimum</th>
+                <th>Maximum</th>
+                <th>Debit</th>
+                <th>Credit</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      function main() {
+        var hero = document.getElementById("hero");
+
+        function parseText(text) {
+          // TODO.
+        }
+
+        // Parse dropped file.
+        function parseFile(file) {
+          console.log("Reading %s (%s bytes).", file.name, file.size);
+          var reader = new FileReader();
+          reader.onload = parseText;
+          reader.readAsText(file, "ISO 8859-1");
+        }
+
+        function onDragOver(event) {
+          event.preventDefault();
+          hero.className = "hero is-fullheight " + (event.type == "dragover" ? "is-success" : "is-info");
+          return false;
+        }
+
+        // Set drag'n'drop event listeners.
+        addEventListener("dragover", onDragOver, false);
+        addEventListener("dragleave", onDragOver, false);
+        addEventListener("drop", function (event) {
+          event.preventDefault();
+          hero.className = "hero is-fullheight is-info";
+
+          parseFile(event.dataTransfer.files[0]);
+
+          return false;
+        }, false);
+      }
+    </script>
+  </body>
+</html>
