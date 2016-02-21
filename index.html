@@ -165,30 +165,30 @@
             // We'll keep track of the current account balance.
             accountAmount[transaction.accountNumber] = transaction.endSaldo;
             // Now we're able to track the total amount;
-            var totalAmount = Object.keys(accountAmount).reduce(function (sum, key) {
+            var endTotalAmount = Object.keys(accountAmount).reduce(function (sum, key) {
               return sum + accountAmount[key];
             }, 0);
             // Now update statistics with this transaction.
             var month = transaction.date.slice(0, 6);
+            var startTotalAmount = endTotalAmount - transaction.endSaldo + transaction.startSaldo;
             var monthStatistics;
             if (statistics.hasOwnProperty(month)) {
               monthStatistics = statistics[month];
               // Just update both minimum and maximum.
-              monthStatistics.min = Math.min(monthStatistics.min, totalAmount);
-              monthStatistics.max = Math.max(monthStatistics.max, totalAmount);
+              monthStatistics.min = Math.min(monthStatistics.min, startTotalAmount, endTotalAmount);
+              monthStatistics.max = Math.max(monthStatistics.max, startTotalAmount, endTotalAmount);
             } else {
               // Open the month.
               monthStatistics = {
-                min: totalAmount,
-                max: totalAmount,
-                // We need to use startSaldo for this account and transaction.
-                open: totalAmount - transaction.endSaldo + transaction.startSaldo,
+                min: Math.min(startTotalAmount, endTotalAmount),
+                max: Math.max(startTotalAmount, endTotalAmount),
+                open: startTotalAmount,
                 credit: 0.0,
                 debit: 0.0,
               };
               statistics[month] = monthStatistics;
             }
-            monthStatistics.close = totalAmount;
+            monthStatistics.close = endTotalAmount;
             if (transaction.amount < 0) {
               monthStatistics.debit += transaction.amount;
             } else {
