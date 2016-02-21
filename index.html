@@ -24,7 +24,7 @@
     <meta name="twitter:description" content="Tool to calculate monthly account statistics based on your transactions history.">
     <title>ABN AMRO Transactions Parser</title>
     <link rel="canonical" href="https://gh.eigenein.xyz/abnamro">
-    <link rel="stylesheet" href="https://cdn.rawgit.com/jgthms/bulma/master/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.rawgit.com/jgthms/bulma/master/css/bulma.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
@@ -38,41 +38,42 @@
               <span class="header-item">
                 <a href="https://eigenein.xyz">eigenein.xyz</a>
               </span>
-            </div>
-            <div class="header-right">
               <span class="header-item">
                 <a href="https://www.abnamro.nl/en/personal/index.html" target="_blank">ABN AMRO</a>
               </span>
+            </div>
+            <div class="header-right">
               <span class="header-item">
-                <a class="button is-primary is-inverted"><i class="fa fa-share"></i> Share</a>
+                <span class="ya-share2" data-services="vkontakte,facebook,odnoklassniki,gplus,twitter,pocket,whatsapp"></span>
               </span>
             </div>
           </div>
         </header>
       </div>
       <div class="hero-content">
-        <div class="container">
+        <div class="container is-fullwidth">
           <h1 class="title">ABN AMRO Transactions Parser</h1>
           <h2 class="subtitle">Drop TAB-file with transactions here to get it parsed.</h2>
 
           <div id="error-notification" class="notification is-danger" style="display: none"></div>
-
-          <table id="statistics-table" class="table" style="display: none">
+          <div class="columns"><div class="column">
+          <table id="statistics-table" class="table is-striped" style="display: none">
             <thead>
               <tr>
                 <th>Month</th>
-                <th>Balance</th>
-                <th>Open</th>
-                <th>Close</th>
-                <th>Minimum</th>
-                <th>Maximum</th>
-                <th>Debit</th>
-                <th>Credit</th>
+                <th style="text-align: right">Balance</th>
+                <th style="text-align: right">Debit</th>
+                <th style="text-align: right">Credit</th>
+                <th style="text-align: right">Open</th>
+                <th style="text-align: right">Close</th>
+                <th style="text-align: right">Minimum</th>
+                <th style="text-align: right">Maximum</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="statistics-table-body">
             </tbody>
           </table>
+          </div></div>
         </div>
       </div>
     </section>
@@ -82,12 +83,19 @@
         var hero = document.getElementById("hero");
         var errorNotification = document.getElementById("error-notification");
         var statisticsTable = document.getElementById("statistics-table");
+        var statisticsTableBody = document.getElementById("statistics-table-body");
+
+        var monthNames = [
+          "Zerouary", "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
 
         // Catch drag'n'drop event.
         function onDragOver(event) {
           event.preventDefault();
           hero.className = "hero is-fullheight " + (event.type == "dragover" ? "is-success" : "is-info");
           errorNotification.style.display = "none";
+          statisticsTable.style.display = "none";
           return false;
         }
 
@@ -113,6 +121,7 @@
           console.log("%s transactions.", transactions.length);
           statistics = calculateStatistics(transactions);
           console.log(statistics);
+          renderStatistics(statistics);
         }
 
         // Parses TAB file.
@@ -190,6 +199,32 @@
           return statistics;
         }
 
+        // Renders statistics table.
+        function renderStatistics(statistics) {
+          statisticsTable.style.display = "table";
+
+          var months = Object.keys(statistics);
+          months.sort();
+
+          var tags = [];
+          for (var i = 0; i < months.length; i++) {
+            var monthStatistics = statistics[months[i]];
+            tags.push(
+              "<tr>",
+              "<td><strong>", monthNames[parseInt(months[i].slice(4, 6))], " ", months[i].slice(0, 4), "</strong></td>",
+              "<td class=\"is-text-right\"><strong>", (monthStatistics.debit + monthStatistics.credit).toFixed(2), "</strong></td>",
+              "<td class=\"is-text-right\">", monthStatistics.debit.toFixed(2), "</td>",
+              "<td class=\"is-text-right\">", monthStatistics.credit.toFixed(2), "</td>",
+              "<td class=\"is-text-right\">", monthStatistics.open.toFixed(2), "</td>",
+              "<td class=\"is-text-right\">", monthStatistics.close.toFixed(2), "</td>",
+              "<td class=\"is-text-right\">", monthStatistics.min.toFixed(2), "</td>",
+              "<td class=\"is-text-right\">", monthStatistics.max.toFixed(2), "</td>",
+              "</tr>"
+            );
+          }
+          statisticsTableBody.innerHTML = tags.join("");
+        }
+
         function init() {
           // Set drag'n'drop event listeners.
           addEventListener("dragover", onDragOver, false);
@@ -206,6 +241,22 @@
 
         init();
       }
+    </script>
+
+    <script type="text/javascript" src="https://yastatic.net/es5-shims/0.0.2/es5-shims.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="https://yastatic.net/share2/share.js" charset="utf-8"></script>
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript"> (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter34092110 = new Ya.Metrika({ id:34092110, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://mc.yandex.ru/metrika/watch.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks"); </script> <noscript><div><img src="https://mc.yandex.ru/watch/34092110" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-65034198-5', 'auto');
+      ga('send', 'pageview');
     </script>
   </body>
 </html>
