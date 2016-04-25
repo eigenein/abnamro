@@ -127,8 +127,8 @@
             errorNotification.style.display = "block";
           }
           console.log("%s transactions.", transactions.length);
-          statistics = calculateStatistics(transactions);
-          console.log(statistics);
+          var statistics = calculateStatistics(transactions);
+          console.log("Statistics:", statistics);
           renderStatistics(statistics);
         }
 
@@ -153,14 +153,21 @@
               startSaldo: parseFloat(values[3].replace(",", ".")),
               endSaldo: parseFloat(values[4].replace(",", ".")),
               amount: parseFloat(values[6].replace(",", ".")),
+              description: values[7]
             });
           }
           return result;
         }
 
         function calculateStatistics(transactions) {
-          var accountAmount = new Object();
-          var statistics = new Object();
+          // Initialize list of account numbers.
+          var accountNumbers = [];
+          for (var i = 0; i < transactions.length; i++) {
+            if (accountNumbers.indexOf(transactions[i].accountNumber) == -1) {
+              accountNumbers.push(transactions[i].accountNumber);
+            }
+          }
+          console.log("Account numbers:", accountNumbers);
           // Sort transactions by date since there can be several accounts.
           transactions.sort(function (a, b) {
             var result = a.date.localeCompare(b.date);
@@ -168,10 +175,24 @@
             return result != 0 ? result : a.index - b.index;
           });
           // And now we're ready to calculate some pretty statistics.
+          var accountAmount = {};
+          var statistics = {};
           for (var i = 0; i < transactions.length; i++) {
             var transaction = transactions[i];
             // We'll keep track of the current account balance.
             accountAmount[transaction.accountNumber] = transaction.endSaldo;
+            // Check if this is a transfer between accounts.
+            var skipTransaction = false;
+            for (var j = 0; j < accountNumbers.length; j++) {
+              if ((accountNumbers[j] != transaction.accountNumber) && (transaction.description.indexOf(accountNumbers[j]) != -1)) {
+                skipTransaction = true;
+                break;
+              }
+            }
+            if (skipTransaction) {
+              console.log("Skip transaction:", transaction.accountNumber, transaction.description);
+              continue;
+            }
             // Now we're able to track the total amount;
             var endTotalAmount = Object.keys(accountAmount).reduce(function (sum, key) {
               return sum + accountAmount[key];
@@ -192,7 +213,7 @@
                 max: Math.max(startTotalAmount, endTotalAmount),
                 open: startTotalAmount,
                 credit: 0.0,
-                debit: 0.0,
+                debit: 0.0
               };
               statistics[month] = monthStatistics;
             }
